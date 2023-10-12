@@ -48,13 +48,6 @@ app.layout = html.Div(children=[html.H1('Social Media Analysis Dashboard',
                                         html.H3('Filter By Post Labels',
                                                 style={'textAlign': 'left', 'color': '#000000',
                                                     'font-size': 25, 'font-family': 'Open Sans', 'text-align': 'center'}),
-                                    
-                                        # dcc.Checklist(id='label-selection',
-                                        #             options=[{'label': label.capitalize(), 'value': label} for label in labels],
-                                        #             value=labels,
-                                        #             labelStyle={'font-size': 15, 'font-family': 'Open Sans', 'padding-left': '15em'}),
-                                    
-                                        # html.Br(),
                                         
                                         html.H4('Account Categories',
                                                 style={'textAlign': 'left', 'color': '#000000', 'font-size': 20, 'font-family': 'Open Sans', 'text-align': 'center'}),
