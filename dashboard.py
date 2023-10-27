@@ -6,6 +6,7 @@ from dash import dcc
 from dash.dependencies import Input, Output
 import plotly.express as px
 import plotly.graph_objects as go
+from dash_holoniq_wordcloud import DashWordcloud
 
 # Load the dataframe
 sm_df = pd.read_csv('sentiment_data_vader_labels.csv')
@@ -17,6 +18,7 @@ sentiment_means = sm_df.groupby(['authoredAt', 'platform']).agg({'positive': 'me
 sentiment_means['positive_7day'] = sentiment_means['positive'].rolling(window=7).mean()
 sentiment_means['negative_7day'] = sentiment_means['negative'].rolling(window=7).mean()
 sentiment_means['compound_7day'] = sentiment_means['compound'].rolling(window=7).mean()
+post_count = (sm_df['authoredAt'].value_counts().sort_index().rolling(window=7).mean()).values
 labels = sm_df.iloc[:, 23:].columns.tolist()
 
 # Create a dash application
@@ -119,8 +121,11 @@ app.layout = html.Div(children=[html.H1('Social Media Analysis Dashboard',
                                                     figure = px.line(sentiment_means, x=sentiment_means['authoredAt'], y=['positive_7day', 'negative_7day'],
                                                     title='Average Sentiment Over Time', labels={'authoredAt':'Date', 'value':'Average Sentiment'}))),
                                 html.Br(),
-                                ])
- 
+                                html.Div(dcc.Graph(id='posts-line-graph', 
+                                                    figure = px.line(sentiment_means, x=sentiment_means['authoredAt'].unique(), y=post_count,
+                                                    title='Average Number of Posts Over Time', labels={'authoredAt':'Date', 'value':'Posts Count'}))),
+                    ])
+
 # Add a callback function for `platform-selection` as input, `compound-sentiment-line-graph` as output
 @app.callback(Output("compound-sentiment-line-graph", "figure"), Input("platform-selection", "value"), Input("account-category", "value"), Input("account-identity", "value"), Input("account-type", "value"), Input("account-location", "value"))
 def get_line_chart(platform_list, account_category, account_identity, account_type, account_location):
@@ -153,6 +158,40 @@ def get_line_chart(platform_list, account_category, account_identity, account_ty
 
     return figure
 
+# Add a callback function for `platform-selection` as input, `posts-line-graph` as output
+@app.callback(Output("posts-line-graph", "figure"), Input("platform-selection", "value"), Input("account-category", "value"), Input("account-identity", "value"), Input("account-type", "value"), Input("account-location", "value"))
+def get_line_chart(platform_list, account_category, account_identity, account_type, account_location):
+
+    # Filter the dataframe based on the selected platforms and the selected labels
+    filtered_df = dataframe_filter(platform_list, sm_df, account_category, account_identity, account_type, account_location)
+
+    filtered_post_count = filtered_df['authoredAt'].value_counts().sort_index().rolling(window=7).mean()
+    filtered_post_count = filtered_post_count.sort_index()
+    filtered_post_count = filtered_post_count.dropna()
+    filtered_post_count = filtered_post_count.values
+    
+    # Create a figure with dual y-axes
+    figure = go.Figure()
+
+    # Add the positive sentiment line with adjusted style
+    figure.add_trace(go.Scatter(x=sorted(filtered_df['authoredAt'].unique()), y=filtered_post_count, mode='lines', name='Post Average (7-day)', line=dict(color='purple', width=2)))
+
+    figure.update_yaxes(range=[filtered_post_count.min() - 25, filtered_post_count.max() + 25])
+
+    # Update the layout of the figure
+    figure.update_layout(
+        title='Average Number of Posts Over Time',
+        xaxis_title='Date',
+        yaxis_title='Post Count',
+        legend_title_text='Post Count',
+        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
+        font_family='Open Sans',
+        font_color='black',
+        title_x=0.5,
+    )
+
+    return figure
+
 # Add a callback function for `platform-selection` as input, `emotion-sentiment-line-graph` as output
 @app.callback(Output("emotion-sentiment-line-graph", "figure"), Input("platform-selection", "value"), Input("account-category", "value"), Input("account-identity", "value"), Input("account-type", "value"), Input("account-location", "value"))
 def get_line_chart(platform_list, account_category, account_identity, account_type, account_location):
@@ -168,10 +207,8 @@ def get_line_chart(platform_list, account_category, account_identity, account_ty
     figure = go.Figure()
 
     # Add the positive sentiment line with adjusted style
-    figure.add_trace(go.Scatter(x=filtered_df['authoredAt'], y=filtered_df['positive_7day'], mode='lines', name='Positive (7-day)', line=dict(color='green', width=2)))
-
-    # Add the negative sentiment line with adjusted style
-    figure.add_trace(go.Scatter(x=filtered_df['authoredAt'], y=filtered_df['negative_7day'], mode='lines', name='Negative (7-day)', line=dict(color='red', width=2)))
+    figure.add_trace(go.Scatter(x=filtered_df['authoredAt'], y=filtered_df['positive_7day'], mode='lines', name='Positive (7-day)', line=dict(color='red', width=2)))
+    figure.add_trace(go.Scatter(x=filtered_df['authoredAt'], y=filtered_df['negative_7day'], mode='lines', name='Negative (7-day)', line=dict(color='green', width=2)))
 
     figure.add_hline(y=0)
     figure.update_yaxes(range=[min(filtered_df['positive_7day'].min(), filtered_df['negative_7day'].min()) - 0.05, max(filtered_df['positive_7day'].max(), filtered_df['negative_7day'].max()) + 0.05])
