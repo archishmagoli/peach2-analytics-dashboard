@@ -1,14 +1,15 @@
 # Import required libraries
-import pandas as pd
 import dash
-from dash import html
-from dash import dcc
+import dash_bootstrap_components as dbc
+from dash import html, dcc
 from dash.dependencies import Input, Output
+import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 from datetime import datetime, timedelta
+
 # Load the dataframe
-sm_df = pd.read_csv('sentiment_data_vader_labels.csv')
+sm_df = pd.read_pickle('sentiment_data_vader_labels.pkl')
 
 # authoredAt column manipulation for timeseries grouping
 sm_df['authoredAt'] = pd.to_datetime(sm_df['authoredAt'])
@@ -20,114 +21,129 @@ sentiment_means['compound_7day'] = sentiment_means['compound'].rolling(window=7)
 post_count = (sm_df['authoredAt'].value_counts().sort_index().rolling(window=7).mean()).values
 labels = sm_df.iloc[:, 23:].columns.tolist()
 
-# Create a dash application
-app = dash.Dash(__name__)
+app = dash.Dash(external_stylesheets=[dbc.themes.BOOTSTRAP])
 
-# Create an app layout
-app.layout = html.Div(children=[html.H1('Social Media Analysis Dashboard',
-                                        style={'textAlign': 'center', 'color': '#000000',
-                                               'font-size': 40, 'font-family': 'Open Sans'}),
-                                # Add checkbox list for selecting social media platforms
-                                # The default values will be that *all* platforms are selected
-                                html.Div([
-                                    # Filter By Social Media Platform
-                                    html.Div([
-                                        html.H3('Filter By Social Media Platform',
-                                                style={'color': '#000000','font-size': 25, 'font-family': 'Open Sans', 'text-align': 'center'}),
-                                    
-                                        dcc.Checklist(id='platform-selection',
-                                                    options=[{'label': platform.capitalize(), 'value': platform} for platform in sm_df.platform.unique()],
-                                                    value=sm_df.platform.unique(),
-                                                    labelStyle={'font-size': 15, 'font-family': 'Open Sans', 'padding-left': '10em'}),
-                                    
-                                        html.Br(),
-                                        html.H3('Filter By a Specific Time Frame',
-                                                style={'color': '#000000',
-                                                    'font-size': 25, 'font-family': 'Open Sans', 'text-align': 'center'}),
-                                        dcc.Dropdown(['Last 15 Days', 'Last 30 Days', 'Last 60 Days',
-                                                      'Last 90 Days', 'Last 6 Months', 'Last 1 Year', 'All Dates'], 'All Dates', id='dates-dropdown',
-                                                    style={'font-size': 15, 'font-family': 'Open Sans', 'padding-left': '10em'}),
-                                    ], style={'display': 'inline-block', 'width': '48%', 'vertical-align': 'top'}),  # Adjust the width as needed
-                                    
-                                    # Filter By Labels
-                                    html.Div([
-                                        html.H3('Filter By Post Labels',
-                                                style={'textAlign': 'left', 'color': '#000000',
-                                                    'font-size': 25, 'font-family': 'Open Sans', 'text-align': 'center'}),
-                                        html.H4('Account Categories',
-                                                style={'textAlign': 'left', 'color': '#000000', 'font-size': 20, 'font-family': 'Open Sans', 'text-align': 'center'}),
-                                        dcc.RadioItems(
-                                            id="account-category",
-                                            labelStyle={'font-size': 15, 'font-family': 'Open Sans', 'padding-left': '15em'},
-                                            options=[
-                                                {"label": "All", "value": "all"},
-                                                {"label": "Government", "value": "government"},
-                                                {"label": "Media", "value": "media"},
-                                                {"label": "Faith", "value": "faith"},
-                                                {"label": "Health", "value": "health"},
-                                                {"label": "Diabetes", "value": "diabetes"},
-                                                {"label": "Known Misinfo Spreaders", "value": "misinfo"},
-                                                {"label": "Project Partners", "value": "partners"},
-                                                {"label": "Trusted Resources", "value": "trusted"},
-                                            ],
-                                            value="all",
-                                        ),
+# the style arguments for the sidebar. We use position:fixed and a fixed width
+SIDEBAR_STYLE = {
+    "position": "fixed",
+    "top": 0,
+    "left": 0,
+    "bottom": 0,
+    "width": "20rem",
+    "padding": "2rem 1rem",
+    "background-color": "#f8f9fa",
+    "overflow": "scroll"
+}
 
-                                        html.H4('Account Identity',
-                                                style={'textAlign': 'left', 'color': '#000000', 'font-size': 20, 'font-family': 'Open Sans', 'text-align': 'center'}),
-                                        dcc.RadioItems(
-                                            id="account-identity",
-                                            labelStyle={'font-size': 15, 'font-family': 'Open Sans', 'padding-left': '15em'},
-                                            options=[
-                                                {"label": "All", "value": "all"},
-                                                {"label": "Black/African American", "value": "blackafam"},
-                                                {"label": "Hispanic/Latinx", "value": "latinx"},
-                                            ],
-                                            value="all",
-                                        ),
+# the styles for the main content position it to the right of the sidebar and
+# add some padding.
+CONTENT_STYLE = {
+    "margin-left": "22rem",
+    "width": "calc(100% - 22rem)",
+    "text-align": "center",
+    "padding": "2rem 1rem",
+    "display": "inline-block"
+}
 
-                                        html.H4('Account Type',
-                                                style={'textAlign': 'left', 'color': '#000000', 'font-size': 20, 'font-family': 'Open Sans', 'text-align': 'center'}),
-                                        dcc.RadioItems(
-                                            id="account-type",
-                                            labelStyle={'font-size': 15, 'font-family': 'Open Sans', 'padding-left': '15em'},
-                                            options=[
-                                                {"label": "All", "value": "all"},
-                                                {"label": "Institution", "value": "institutional"},
-                                                {"label": "Non-Institution", "value": "non-institutional"},
-                                            ],
-                                            value="all",
-                                        ),
+sidebar = html.Div(
+    [# Filter By Social Media Platform and Time Frame
+        html.Div([
+            html.H4('Filter By Social Media Platform'),
+        
+            dcc.Checklist(id='platform-selection',
+                        options=[{'label': platform.capitalize(), 'value': platform} for platform in sm_df.platform.unique()],
+                        value=sm_df.platform.unique(),
+                        inputStyle={"margin-right":"0.5rem", "margin-left":"0.5rem"}),
+            html.Br(),
+            html.H4('Filter By Time Frame'),
+            dcc.Dropdown(['Last 15 Days', 'Last 30 Days', 'Last 60 Days',
+                            'Last 90 Days', 'Last 6 Months', 'Last 1 Year', 'All Dates'], 'All Dates', id='dates-dropdown'),
+        ]),  # Adjust the width as needed
+        
+        html.Br(),
+        # Filter By Labels
+        html.Div([
+            html.H4('Filter By Post Labels'),
+            html.H5('Account Categories'),
+            dcc.RadioItems(
+                id="account-category",
+                options=[
+                    {"label": "All", "value": "all"},
+                    {"label": "Government", "value": "government"},
+                    {"label": "Media", "value": "media"},
+                    {"label": "Faith", "value": "faith"},
+                    {"label": "Health", "value": "health"},
+                    {"label": "Diabetes", "value": "diabetes"},
+                    {"label": "Known Misinfo Spreaders", "value": "misinfo"},
+                    {"label": "Project Partners", "value": "partners"},
+                    {"label": "Trusted Resources", "value": "trusted"},
+                ],
+                value="all",
+                inputStyle={"margin-right":"0.5rem", "margin-left":"0.5rem"}
+            ),
+            html.Br(),
+            html.H5('Account Identity'),
+            dcc.RadioItems(
+                id="account-identity",
+                options=[
+                    {"label": "All", "value": "all"},
+                    {"label": "Black/African American", "value": "blackafam"},
+                    {"label": "Hispanic/Latinx", "value": "latinx"},
+                ],
+                value="all",
+                inputStyle={"margin-right":"0.5rem", "margin-left":"0.5rem"}
+            ),
+            html.Br(),
+            html.H5('Account Type'),
+            dcc.RadioItems(
+                id="account-type",
+                options=[
+                    {"label": "All", "value": "all"},
+                    {"label": "Institution", "value": "institutional"},
+                    {"label": "Non-Institution", "value": "non-institutional"},
+                ],
+                value="all",
+                inputStyle={"margin-right":"0.5rem", "margin-left":"0.5rem"}
+            ),
+            html.Br(),
+            html.H5('Account Location'),
+            dcc.RadioItems(
+                id="account-location",
+                options=[
+                    {"label": "All", "value": "all"},
+                    {"label": "Georgia", "value": "georgia"},
+                    {"label": "Non-Georgia", "value": "non-georgia"},
+                ],
+                value="all",
+                inputStyle={"margin-right":"0.5rem", "margin-left":"0.5rem"}
+            ),
+        ]),  # Adjust the width as needed
+    ],
+    style=SIDEBAR_STYLE,
+)
 
-                                        html.H4('Account Location',
-                                                style={'textAlign': 'left', 'color': '#000000', 'font-size': 20, 'font-family': 'Open Sans', 'text-align': 'center'}),
-                                        dcc.RadioItems(
-                                            id="account-location",
-                                            labelStyle={'font-size': 15, 'font-family': 'Open Sans', 'padding-left': '15em'},
-                                            options=[
-                                                {"label": "All", "value": "all"},
-                                                {"label": "Georgia", "value": "georgia"},
-                                                {"label": "Non-Georgia", "value": "non-georgia"},
-                                            ],
-                                            value="all",
-                                        ),
-                                    ], style={'display': 'inline-block', 'width': '48%', 'vertical-align': 'top'}),  # Adjust the width as needed
-                                ]),
-                                # Show the average sentiment over time through a line graph
-                                # If a specific platform was selected, show the average sentiment only for the selected platform
-                                # TODO: Create a time filter (i.e. a range slider) for the line graph
-                                html.Div(dcc.Graph(id='compound-sentiment-line-graph', 
-                                                    figure = px.line(sentiment_means, x=sentiment_means['authoredAt'], y=['compound_7day'],
-                                                    title='Average Compound Sentiment Over Time', labels={'authoredAt':'Date', 'value':'Average Sentiment'}))),
-                                html.Br(),
-                                html.Div(dcc.Graph(id='emotion-sentiment-line-graph', 
-                                                    figure = px.line(sentiment_means, x=sentiment_means['authoredAt'], y=['positive_7day', 'negative_7day'],
-                                                    title='Average Sentiment Over Time', labels={'authoredAt':'Date', 'value':'Average Sentiment'}))),
-                                html.Br(),
-                                html.Div(dcc.Graph(id='posts-line-graph', 
-                                                    figure = px.line(sentiment_means, x=sentiment_means['authoredAt'].unique(), y=post_count,
-                                                    title='Average Number of Posts Over Time', labels={'authoredAt':'Date', 'value':'Posts Count'}))),
-                    ])
+maindiv = html.Div(
+    id="first-div",
+    children=[
+        html.H1('Social Media Analysis Dashboard'),
+        html.Div(dcc.Graph(id='compound-sentiment-line-graph', 
+            figure = px.line(sentiment_means, x=sentiment_means['authoredAt'], y=['compound_7day'],
+            title='Average Compound Sentiment Over Time', labels={'authoredAt':'Date', 'value':'Average Sentiment'}))),
+            html.Br(),
+
+            html.Div(dcc.Graph(id='emotion-sentiment-line-graph', 
+                        figure = px.line(sentiment_means, x=sentiment_means['authoredAt'], y=['positive_7day', 'negative_7day'],
+                        title='Average Sentiment Over Time', labels={'authoredAt':'Date', 'value':'Average Sentiment'}))),
+            html.Br(),
+
+            html.Div(dcc.Graph(id='posts-line-graph', 
+                        figure = px.line(sentiment_means, x=sentiment_means['authoredAt'].unique(), y=post_count,
+                        title='Average Number of Posts Over Time', labels={'authoredAt':'Date', 'value':'Posts Count'}))),
+    ],
+    style=CONTENT_STYLE
+)
+
+app.layout = html.Div([sidebar, maindiv])
 
 # Add a callback function for `platform-selection` as input, `compound-sentiment-line-graph` as output
 @app.callback(Output("compound-sentiment-line-graph", "figure"), Input("platform-selection", "value"), Input("account-category", "value"), Input("account-identity", "value"), Input("account-type", "value"), Input("account-location", "value"), Input("dates-dropdown", "value"))
@@ -276,6 +292,7 @@ def dataframe_filter(platform_list, sm_df, account_category, account_identity, a
 
     return filtered_df
 
+
 # Run the app
-if __name__ == '__main__':
-    app.run_server()
+if __name__ == "__main__":
+    app.run_server(port=8000)
