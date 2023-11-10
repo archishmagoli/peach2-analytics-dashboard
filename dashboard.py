@@ -125,7 +125,7 @@ sidebar = html.Div(
 maindiv = html.Div(
     id="first-div",
     children=[
-        html.H1('Social Media Analysis Dashboard'),
+        html.H1('Social Media Analytics Dashboard'),
         html.Div(dcc.Graph(id='compound-sentiment-line-graph', 
             figure = px.line(sentiment_means, x=sentiment_means['authoredAt'], y=['compound_7day'],
             title='Average Compound Sentiment Over Time', labels={'authoredAt':'Date', 'value':'Average Sentiment'}))),
