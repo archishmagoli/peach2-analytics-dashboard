@@ -48,7 +48,7 @@ CONTENT_STYLE = {
 sidebar = html.Div(
     [# Filter By Social Media Platform and Time Frame
         html.Div([
-            html.H4('Filter By Social Media Platform'),
+            html.H4('Filter By Platform'),
         
             dcc.Checklist(id='platform-selection',
                         options=[{'label': platform.capitalize(), 'value': platform} for platform in sm_df.platform.unique()],
