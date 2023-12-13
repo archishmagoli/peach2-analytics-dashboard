@@ -437,8 +437,3 @@ def dataframe_filter(sm_df, platform_list, account_category, account_identity, a
         filtered_df = filtered_df[(filtered_df['authoredAt'] >= start_date) & (filtered_df['authoredAt'] <= end_date)]
 
     return [filtered_df, start_date, end_date]
-
-
-# Run the app
-if __name__ == "__main__":
-    app.run_server(port=8000)
