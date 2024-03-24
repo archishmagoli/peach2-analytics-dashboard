@@ -1,5 +1,5 @@
 # This is the entry point into our application.
-from dashboard import app
+from new_dashboard import app
 
 # Run the app
 if __name__ == "__main__":
