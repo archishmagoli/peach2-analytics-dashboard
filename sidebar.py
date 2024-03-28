@@ -172,6 +172,7 @@ def dataframe_filter(sm_df, platform_list, account_category, account_identity, a
         start_date = None
 
         if relative_date != 'All Dates':
+            end_date = current_date.date()
             if relative_date == 'Last 7 Days':
                 start_date = current_date - pd.DateOffset(days=7)
                 start_date = start_date.date()

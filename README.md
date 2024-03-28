@@ -1,2 +1,2 @@
-# peach2-analytics-dashboard
-Analytics Dashboard for PEACH-2 Project, built using the Plotly and Dash frameworks.
+# PEACH-2 Social Media Analytics Dashboard
+Analytics Dashboard for PEACH-2 Project, built using Plotly and Dash.

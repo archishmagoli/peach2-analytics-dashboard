@@ -10,7 +10,7 @@ import plotly.graph_objects as go
 from data_process import process_pickle
 from style import CONTENT_STYLE
 from sidebar import sidebar, dataframe_filter
-from graphs import hot_topics, topic_bar_graph
+from graphs import hot_topics, topic_bar_graph, engagement_statistics
 
 sm_df = process_pickle()
 
@@ -31,7 +31,8 @@ maindiv = html.Div(
         html.Div(
             children=[
                 html.H2(children='Time Period At a Glance'),
-                html.Div(children=[hot_topics(column_sums)], style={"display": "flex"})
+                html.Div(children=[hot_topics(column_sums), engagement_statistics(sidebar.children[0].children[4].value, sidebar.children[0].children[6].children[1].value, 
+                                                                                  sidebar.children[0].children[5].children[1].start_date, sidebar.children[0].children[5].children[1].end_date)], style={"display": "flex"})
             ], style = {"padding": "1rem"}
         )
     ],
@@ -80,6 +81,7 @@ def date_options(visibility_state):
 # Graph + Chart Callback Functions
 @app.callback(
         Output("topic-bar-graph", "figure"),
+        Output("engagement", "children"),
     
         # Platform Selection
         Input("platform-selection", "value"),
@@ -104,6 +106,7 @@ def date_options(visibility_state):
 
         # Input("com-b-components", "value") - COM-B components for later implementation
     )
+
 def graphs(platform_list, account_category, account_identity, account_type, account_location, time_frame, relative_date, start_date, end_date):
     # Filter the dataframe based on the selected platforms and the selected labels
     result = dataframe_filter(sm_df, platform_list, account_category, account_identity, account_type, account_location, time_frame, relative_date, start_date, end_date)
@@ -125,4 +128,4 @@ def graphs(platform_list, account_category, account_identity, account_type, acco
     column_sums.rename(columns={'index': 'topic', 0: 'value'}, inplace=True) # Rename the columns
     
 
-    return topic_bar_graph(column_sums)
+    return topic_bar_graph(column_sums), engagement_statistics(time_frame, relative_date, start_date, end_date)

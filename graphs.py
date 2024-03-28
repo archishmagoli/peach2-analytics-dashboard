@@ -8,8 +8,8 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 from data_process import process_pickle
-from style import CONTENT_STYLE
-from sidebar import sidebar, dataframe_filter
+
+sm_df = process_pickle()
 
 def hot_topics(column_sums):
     return html.Div(id='hot_topics',
@@ -48,5 +48,39 @@ def topic_bar_graph(column_sums):
     )
 
     return topic_bar_graph
+
+
+def engagement_statistics(time_frame, relative_date, start_date, end_date):
+    # Facebook (in raw data pull): actual - likeCount, shareCount, commentCount, loveCount, 
+        # wowCount, hahaCount, sadCount, angryCount, thankfulCount, careCount
+    
+    # Instagram (in raw data pull): actual - favoriteCount, commentCount
+
+    # Twitter (in raw data pull): retweets, replies, likes, quote_count
+
+    total_posts = 0
+    if time_frame == 'relative':
+        total_posts = len(sm_df.index)
+    else:
+        total_posts = len(sm_df[(sm_df['authoredAt'] >= start_date) 
+                                & (sm_df['authoredAt'] <= end_date)])
+                
+    # print(sm_df['raw'].dtype)
+
+    # print("Time Frame: " + time_frame)
+    # print("Relative Date: " + relative_date)
+    # print("Start Date: " + str(start_date))
+    # print("End Date: " + str(end_date))
+
+    return html.Div(id='engagement',
+            children=[
+                html.H4(id='Engagement Statistics', children='Engagement Statistics', style={'fontStyle': 'italic'}),
+                html.Div(id='statistics', children=[
+                    html.H5('Total Posts: ' + str(total_posts))
+                ])
+            ],
+            style={'textAlign': 'left', 'width': '100%'}
+        )
+
 
             
