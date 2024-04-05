@@ -10,7 +10,7 @@ import plotly.graph_objects as go
 from data_process import process_pickle
 from style import CONTENT_STYLE
 from sidebar import sidebar, dataframe_filter
-from graphs import hot_topics, topic_bar_graph, engagement_statistics
+from graphs import hot_topics, topic_bar_graph, engagement_statistics, posts
 
 sm_df = process_pickle()
 
@@ -36,9 +36,11 @@ maindiv = html.Div(
             children=[
                 html.H2(children='Time Period At a Glance'),
                 html.Div(children=[hot_topics(column_sums), 
-                                   engagement_statistics(sidebar.children[0].children[4].value, sidebar.children[0].children[6].children[1].value, 
-                                                                                  sidebar.children[0].children[5].children[1].start_date, sidebar.children[0].children[5].children[1].end_date)], 
-                        style={"display": "inline-flex", "width": "100%"})
+                                   engagement_statistics(sm_df),                                      
+                                    ], 
+                        style={"display": "inline-flex", "width": "100%", "alignItems": "center"}),
+                html.Div(children=[html.H4(id='New and Popular', children='See What\'s New and Popular', style={'fontStyle': 'italic', 'marginTop': '1em'}), 
+                                   posts(sm_df)], style={"max-width": "100vw"})
             ], style = {"padding": "1rem"}
         )
     ],
@@ -88,6 +90,7 @@ def date_options(visibility_state):
 @app.callback(
         Output("topic-bar-graph", "figure"),
         Output("engagement", "children"),
+        Output("posts", "children"),
     
         # Platform Selection
         Input("platform-selection", "value"),
@@ -137,4 +140,4 @@ def graphs(platform_list, account_category, account_identity, account_type, acco
     column_sums.rename(columns={'index': 'topic', 0: 'value'}, inplace=True) # Rename the columns
     column_sums = column_sums.sort_values(['value'], ascending = False).head(20).reset_index()
 
-    return topic_bar_graph(column_sums), engagement_statistics(time_frame, relative_date, start_date, end_date)
+    return topic_bar_graph(column_sums), engagement_statistics(result[0]), posts(result[0])

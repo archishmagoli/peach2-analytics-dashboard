@@ -15,7 +15,7 @@ sm_df = process_pickle()
 def hot_topics(column_sums):
     return html.Div(id='hot_topics',
             children=[
-                html.H4(id='Hot Topics', children='Hot Topics 🔥', style={'fontStyle': 'italic'}),
+                html.H4(id='Hot Topics', children='Keywords', style={'fontStyle': 'italic'}),
                 dcc.Graph(
                     id='topic-bar-graph',
                     figure = px.bar(
@@ -27,7 +27,7 @@ def hot_topics(column_sums):
                     style = {'border': '1px solid black', 'min-width': '30rem'}
                 ),
             ],
-            style={'textAlign': 'left', 'width': '75%'}
+            style={'textAlign': 'center', 'width': '75%'}
         )
 
 def topic_bar_graph(column_sums):
@@ -51,7 +51,7 @@ def topic_bar_graph(column_sums):
     return topic_bar_graph
 
 
-def engagement_statistics(time_frame, relative_date, start_date, end_date):
+def engagement_statistics(filtered_df):
     # Pre-processing needed: Raw engagement - sum up all raw values
     # Normalized engagement - sum up all raw values, divide by the number of followers
 
@@ -60,40 +60,8 @@ def engagement_statistics(time_frame, relative_date, start_date, end_date):
     # Instagram (in current data pull): actual - favoriteCount, commentCount
     # Twitter (in current data pull): retweets, replies, likes, quote_count
 
-    sm_df_filtered = sm_df
-
-    if time_frame == 'relative':
-        current_date = datetime.now()
-        if relative_date == 'Last 7 Days':
-            start_date = current_date - pd.DateOffset(days=7)
-            start_date = start_date.date()
-        elif relative_date == 'Last 15 Days':
-            start_date = current_date - pd.DateOffset(days=15)
-            start_date = start_date.date()
-        elif relative_date == 'Last 30 Days':
-            start_date = current_date - pd.DateOffset(days=30)
-            start_date = start_date.date()
-        elif relative_date == 'Last 60 Days':
-            start_date = current_date - pd.DateOffset(days=60)
-            start_date = start_date.date()
-        elif relative_date == 'Last 90 Days':
-            start_date = current_date - pd.DateOffset(days=90)
-            start_date = start_date.date()
-        elif relative_date == 'Last 6 Months':
-            start_date = current_date - pd.DateOffset(months=6)
-            start_date = start_date.date()
-        elif relative_date == 'Last 1 Year':
-            start_date = current_date - pd.DateOffset(years=1)
-            start_date = start_date.date()
-        elif relative_date == 'All Dates':
-            start_date = sm_df_filtered['authoredAt'].min()
-        end_date = current_date.date()
-    
-    sm_df_filtered = sm_df[(sm_df['authoredAt'] >= start_date) 
-                                & (sm_df['authoredAt'] <= end_date)]
-
-    total_posts = len(sm_df_filtered.index)
-    total_reactions = sum(sm_df_filtered['engagementRaw'])
+    total_posts = len(filtered_df.index)
+    total_reactions = sum(filtered_df['engagementRaw'])
                 
     # for post in sm_df_filtered['raw']:
     #     id_index = post.find("'legacyId'")
@@ -111,16 +79,33 @@ def engagement_statistics(time_frame, relative_date, start_date, end_date):
                             html.H4(id='Engagement Statistics', children='Engagement Statistics', style={'fontStyle': 'italic'}),
                             html.Div(id='statistics', 
                                      children=[
-                                        html.H5('Total Posts: ' + f'{total_posts:,}'),
-                                        html.H5('Total Reactions: ' + f'{total_reactions:,}')
+                                        html.H4(f'{total_posts:,} ' + 'Total Posts'),
+                                        html.H4(f'{total_reactions:,} ' + 'Total Reactions')
                                     ]
                                 )
                         ], justify="center", align="center", className="h-50"         
-                , style={"height": "100vh"}
+                , style={"height": "100vh", "alignItems": "center"}
             )
-        ])
+        ], style={'border': '1px solid black', 'max-width': '100vw', "margin": "1em"})
         ]
     )
+
+def posts(sm_df):
+    posts = []
+    filtered_df = sm_df.sort_values(by='engagementRaw', ascending=False).head(20).reset_index()
+    for index, row in filtered_df.iterrows():       
+        posts.append(html.Div(children=[
+                                html.H5(row['platform'].title(), 
+                                        style={'fontWeight': 'bold'}),
+                                html.A('Link to Post', href=row['url']),
+                                html.P(row['authoredAt']),
+                                html.P(row['content']),
+                                ], style={'border': '1px solid black', 'height': '25em', 'max-width': '30em', 
+                                            'min-width': '20em', 'overflow': 'auto', 'margin': '1em'}
+        ))
+
+    return html.Div(id='posts', children=posts, style={'display': 'flex', 'max-width': '100vw', 
+                                                       'overflow-x': 'auto'})
 
 
             
