@@ -7,12 +7,11 @@ from dash.dependencies import Input, Output, State
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
-from data_process import process_pickle
 from style import CONTENT_STYLE
 from sidebar import sidebar, dataframe_filter
 from graphs import hot_topics, topic_bar_graph, engagement_statistics, posts
 
-sm_df = process_pickle()
+sm_df = pd.read_pickle('testing_data_vader.pkl')
 
 # Topic Data Calculations
 topics = list(set(val for sublist in sm_df['extracted_keywords'] for val in sublist)) # Get the unique topics
