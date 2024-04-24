@@ -14,11 +14,11 @@ from graphs import hot_topics, topic_bar_graph, engagement_statistics, posts
 sm_df = pd.read_pickle('testing_data_vader.pkl')
 
 # Topic Data Calculations
-topics = list(set(val for sublist in sm_df['extracted_keywords'] for val in sublist)) # Get the unique topics
+topics = list(set(val for sublist in sm_df['topics'] for val in sublist)) # Get the unique topics
 column_sums = {} # Create a dictionary to store the topic sums
 for topic in topics:
     keyword_sum = column_sums[topic] if topic in column_sums.keys() else 0
-    for topic_list in sm_df['extracted_keywords']:
+    for topic_list in sm_df['topics']:
         keyword_sum += topic_list.count(topic)
     column_sums[topic] = keyword_sum # Add a column for each topic to the dataframe
 column_sums = pd.DataFrame(column_sums, index=[0]).T.reset_index() # Convert the dictionary to a dataframe
@@ -123,7 +123,7 @@ def graphs(platform_list, account_category, account_identity, account_type, acco
     end_date = result[2]
 
     topic_df = filtered_df
-    topics = list(set(val for sublist in topic_df['extracted_keywords'] for val in sublist)) # Get the unique topics
+    topics = list(set(val for sublist in topic_df['topics'] for val in sublist)) # Get the unique topics
 
     filtered_df = filtered_df.groupby(['authoredAt', 'platform']).agg({'positive': 'mean', 'negative': 'mean', 'compound': 'mean'}).reset_index()
     filtered_df['compound_7day'] = filtered_df['compound'].rolling(window=7).mean()
@@ -132,7 +132,7 @@ def graphs(platform_list, account_category, account_identity, account_type, acco
     column_sums = {}
     for topic in topics:
         keyword_sum = column_sums[topic] if topic in column_sums.keys() else 0
-        for topic_list in topic_df['extracted_keywords']:
+        for topic_list in topic_df['topics']:
             keyword_sum += topic_list.count(topic)
         column_sums[topic] = keyword_sum # Add a column for each topic to the dataframe
     column_sums = pd.DataFrame(column_sums, index=[0]).T.reset_index() # Convert the dictionary to a dataframe

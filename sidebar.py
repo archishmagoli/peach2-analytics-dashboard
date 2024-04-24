@@ -1,11 +1,10 @@
 # Import required libraries
 from dash import html, dcc
 from style import SIDEBAR_STYLE
-from data_process import process_pickle
 from datetime import datetime
 import pandas as pd
 
-sm_df = process_pickle()
+sm_df = pd.read_pickle('testing_data_vader.pkl')
 
 sidebar = html.Div(
     [# Filter By Social Media Platform and Time Frame
@@ -168,7 +167,7 @@ def dataframe_filter(sm_df, platform_list, account_category, account_identity, a
 
     # Relative vs. Custom Date Range
     if time_frame == 'relative':
-        current_date = datetime.now()
+        current_date = filtered_df['authoredAt'].max()
         start_date = None
 
         if relative_date != 'All Dates':
@@ -194,12 +193,12 @@ def dataframe_filter(sm_df, platform_list, account_category, account_identity, a
             elif relative_date == 'Last 1 Year':
                 start_date = current_date - pd.DateOffset(years=1)
                 start_date = start_date.date()
-            filtered_df = filtered_df[filtered_df['authoredAt'] >= start_date]
+            filtered_df = filtered_df[filtered_df['authoredAt'] >= datetime.combine(start_date, datetime.min.time())]
 
     else:
         date_format = '%Y-%m-%d'
         start_date = datetime.strptime(start_date, date_format).date() if isinstance(start_date, str) else start_date
         end_date = datetime.strptime(end_date, date_format).date() if isinstance(end_date, str) else end_date
-        filtered_df = filtered_df[(filtered_df['authoredAt'] >= start_date) & (filtered_df['authoredAt'] <= end_date)]
+        filtered_df = filtered_df[(filtered_df['authoredAt'] >=  datetime.combine(start_date, datetime.min.time())) & (filtered_df['authoredAt'].date() <= datetime.combine(end_date, datetime.min.time()))]
 
     return [filtered_df, start_date, end_date]
