@@ -21,7 +21,7 @@ def hot_topics(column_sums):
                         column_sums, 
                         x=column_sums['topic'],
                         y=column_sums['value'],
-                        title='Topic Breakdown of Social Media Posts',
+                        title='Keyword Breakdown of Social Media Posts',
                         color_discrete_sequence=px.colors.qualitative.Prism),
                     style = {'border': '1px solid black', 'width': '45em'}
                 ),
@@ -34,7 +34,7 @@ def topic_bar_graph(column_sums):
         column_sums, 
         x='topic', 
         y='value',
-        title='Topic Breakdown of Social Media Posts', 
+        title='Keyword Breakdown of Social Media Posts', 
         color='topic',
         color_discrete_sequence=px.colors.qualitative.Prism
     )
