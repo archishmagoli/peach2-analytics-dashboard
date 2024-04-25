@@ -39,12 +39,15 @@ maindiv = html.Div(
         html.H1(id='title', children='Social Media Analytics Dashboard'),
         html.Div(
             children=[
-                html.Br(),
-                html.H2(children='Time Period At a Glance'),
+                html.Hr(style={'borderTop': '2px solid black'}),
+                html.H2(children='Time Period At a Glance', style={"textAlign":"left"}),
                 html.Div(children=maindiv_list, 
-                        style={"display": "inline-flex", "width": "100%", "alignItems": "center", "justifyContent": "center", "gap": "5em"}),
+                        style={"display": "inline-flex", "max-width": "100vw", "alignItems": "center", "justifyContent": "center", "gap": "5em"}),
                 html.Div(children=[html.H4(id='New and Popular', children='See What\'s New and Popular', style={'fontStyle': 'italic', 'marginTop': '1em'}), 
-                                   posts(sm_df)], style={"max-width": "100vw"})
+                                   posts(sm_df)], style={"max-width": "100vw"}),
+                html.Br(),
+                html.Hr(style={'borderTop': '2px solid black'}),
+                html.H2(children='Content and Engagement', style={"textAlign":"left"})
             ]
         )
     ],
