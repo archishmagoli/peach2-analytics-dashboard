@@ -16,6 +16,5 @@ CONTENT_STYLE = {
     "marginLeft": "24rem",
     "width": "calc(100% - 24rem)",
     "textAlign": "center",
-    "padding": "2rem 1rem",
-    "display": "inline-block",
+    "padding": "2rem 1rem"
 }

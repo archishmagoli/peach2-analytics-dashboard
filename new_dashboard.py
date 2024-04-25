@@ -9,9 +9,10 @@ import plotly.express as px
 import plotly.graph_objects as go
 from style import CONTENT_STYLE
 from sidebar import sidebar, dataframe_filter
-from graphs import hot_topics, topic_bar_graph, engagement_statistics, posts
+from graphs import hot_topics, topic_bar_graph, engagement_statistics, posts, tf_idf
 
 sm_df = pd.read_pickle('testing_data_vader.pkl')
+weekly_df = pd.read_pickle('weekly_tf_idf.pkl')
 
 # Topic Data Calculations
 topics = list(set(val for sublist in sm_df['topics'] for val in sublist)) # Get the unique topics
@@ -27,20 +28,24 @@ column_sums = column_sums.sort_values(['value'], ascending = False).head(20).res
 
 app = dash.Dash(external_stylesheets=[dbc.themes.BOOTSTRAP])
 
+maindiv_list = []
+maindiv_list.append(tf_idf(weekly_df))
+maindiv_list.append(hot_topics(column_sums))
+maindiv_list.append(engagement_statistics(sm_df))
+
 maindiv = html.Div(
     id="first-div",
     children=[
         html.H1(id='title', children='Social Media Analytics Dashboard'),
         html.Div(
             children=[
+                html.Br(),
                 html.H2(children='Time Period At a Glance'),
-                html.Div(children=[hot_topics(column_sums), 
-                                   engagement_statistics(sm_df),                                      
-                                    ], 
-                        style={"display": "inline-flex", "width": "100%", "alignItems": "center"}),
+                html.Div(children=maindiv_list, 
+                        style={"display": "inline-flex", "width": "100%", "alignItems": "center", "justifyContent": "center", "gap": "5em"}),
                 html.Div(children=[html.H4(id='New and Popular', children='See What\'s New and Popular', style={'fontStyle': 'italic', 'marginTop': '1em'}), 
                                    posts(sm_df)], style={"max-width": "100vw"})
-            ], style = {"padding": "1rem"}
+            ]
         )
     ],
     style = CONTENT_STYLE
@@ -90,6 +95,7 @@ def date_options(visibility_state):
         Output("topic-bar-graph", "figure"),
         Output("engagement", "children"),
         Output("posts", "children"),
+        Output("tf-idf", "children"),
     
         # Platform Selection
         Input("platform-selection", "value"),
@@ -117,7 +123,7 @@ def date_options(visibility_state):
 
 def graphs(platform_list, account_category, account_identity, account_type, account_location, time_frame, relative_date, start_date, end_date):
     # Filter the dataframe based on the selected platforms and the selected labels
-    result = dataframe_filter(sm_df, platform_list, account_category, account_identity, account_type, account_location, time_frame, relative_date, start_date, end_date)
+    result = dataframe_filter(sm_df, weekly_df, platform_list, account_category, account_identity, account_type, account_location, time_frame, relative_date, start_date, end_date)
     filtered_df = result[0]
     start_date = result[1] # Save the start and end dates for x-axis labels
     end_date = result[2]
@@ -139,4 +145,4 @@ def graphs(platform_list, account_category, account_identity, account_type, acco
     column_sums.rename(columns={'index': 'topic', 0: 'value'}, inplace=True) # Rename the columns
     column_sums = column_sums.sort_values(['value'], ascending = False).head(20).reset_index()
 
-    return topic_bar_graph(column_sums), engagement_statistics(result[0]), posts(result[0])
+    return topic_bar_graph(column_sums), engagement_statistics(result[0]), posts(result[0]), tf_idf(result[1])
