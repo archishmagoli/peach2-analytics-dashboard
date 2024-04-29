@@ -8,6 +8,7 @@ from dash.dependencies import Input, Output, State
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
+from dash import dash_table
 
 # filtered_df = pd.read_pickle('testing_data_vader.pkl')
 
@@ -23,7 +24,7 @@ def hot_topics(column_sums):
                         y=column_sums['value'],
                         title='Keyword Breakdown of Social Media Posts',
                         color_discrete_sequence=px.colors.qualitative.Prism),
-                    style = {'border': '1px solid black', 'width': '45em'}
+                    style = {'border': '1px solid black', 'width': '5em'}
                 ),
             ],
             style={'textAlign': 'center', 'margin': '1em'}
@@ -193,29 +194,28 @@ def posts(sm_df):
                                                        'overflow-x': 'auto'})
 
 def tf_idf(weekly_df):
-    last_date = weekly_df.iloc[0]
-    sorted_df = pd.DataFrame(last_date).transpose()['tfIdfMatrix']
-    sorted_df = sorted_df.iloc[0]
+    weekly_df['weekAuthored'] = pd.to_datetime(weekly_df['weekAuthored'])
+    weekly_df['weekAuthored'] = weekly_df['weekAuthored'].dt.strftime('%m/%d/%Y')
+    weekly_df = weekly_df.rename(columns={'weekAuthored' : 'Week Authored'})
 
-    # Remove one-character words or strange numbers..
-    new_sorted_df = {}
-    for key, value in sorted_df.items():
-        if not key.isdigit() and len(key) > 3:
-            new_sorted_df[key] = value
+    return html.Div(
+    id='tf-idf',
+    style={'width': '50vw', 'height': '40vh', 'overflow': 'auto'},  # Apply overflow auto to the container
+    children=[
+        dash_table.DataTable(
+            id='table',
+            columns=[{'name': str(col), 'id': str(col)} for col in weekly_df.columns],
+            data=weekly_df.to_dict('records'),
+            style_table={'overflowX': 'auto', 'overflowY': 'auto', 'width': '100%'},  # Set table width to 100%
+            style_cell={
+                'whiteSpace': 'normal',
+                'height': 'auto',
+                'fontFamily': 'inherit',
+                'textAlign': 'center',
+            }
+        )
+    ]
+)
 
-    sorted_df = pd.DataFrame.from_dict(new_sorted_df, orient='index', columns=['tfIdfValue'])
-    sorted_df = sorted_df.reset_index()
-    sorted_df = sorted_df.rename(columns={'index' : 'keyword'})
-    sorted_df = sorted_df.sort_values(by='tfIdfValue', ascending=False)
-    
-    values = []
-    sorted_df = sorted_df.head(20)
-    count_num = 1
-
-    for index, row in sorted_df.iterrows():
-        values.append(html.P(str(count_num) + '. ' + row['keyword']))
-        count_num += 1
-
-    return html.Div(id='tf-idf', children=[html.H4(children='Hot Topics 🔥', style={'fontStyle': 'italic'}), 
-                                           html.Div(children=values, style={'border':'1px solid black', 'display': 'inline-block', 'justifyContent': 'center', 'alignItems': 'center', 
-                                                                            'textAlign': 'center', 'width': '20em', 'height': '30em', 'overflow': 'auto'})])
+# def groups_and_communities(sm_df):
+#     interesting_authors = ['Survivor Corps', 'Stand for Health Freedom']
