@@ -214,7 +214,10 @@ def tf_idf(sm_df, weekly_df):
     weekly_df['weekAuthored'] = weekly_df['weekAuthored'].dt.strftime('%m/%d/%Y').copy()
     weekly_df = weekly_df.rename(columns={'weekAuthored' : 'Week Authored'})
 
-    filtered_df = filtered_df.head(15)
+    authors_to_remove = ['Survivor Corps', 'COVID-19 Long Haulers Support', 'A Voice for Choice']
+    filtered_df = filtered_df[~filtered_df['author'].isin(authors_to_remove)]
+
+    filtered_df = filtered_df.head(100)
 
     posts = []
 
