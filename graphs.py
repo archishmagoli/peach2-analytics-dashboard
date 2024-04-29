@@ -10,8 +10,6 @@ import plotly.express as px
 import plotly.graph_objects as go
 from dash import dash_table
 
-# filtered_df = pd.read_pickle('testing_data_vader.pkl')
-
 def hot_topics(column_sums):
     return html.Div(id='hot_topics',
             children=[
