@@ -4,7 +4,7 @@ from style import SIDEBAR_STYLE
 from datetime import datetime
 import pandas as pd
 
-sm_df = pd.read_pickle('testing_data_vader.pkl')
+sm_df = pd.read_pickle('updated_testing_data.pkl')
 
 sidebar = html.Div(
     [# Filter By Social Media Platform and Time Frame

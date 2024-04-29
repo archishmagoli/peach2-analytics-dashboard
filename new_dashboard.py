@@ -11,7 +11,7 @@ from style import CONTENT_STYLE
 from sidebar import sidebar, dataframe_filter
 from graphs import hot_topics, topic_bar_graph, engagement_statistics, posts, tf_idf
 
-sm_df = pd.read_pickle('testing_data_vader.pkl')
+sm_df = pd.read_pickle('updated_testing_data.pkl')
 weekly_df = pd.read_pickle('keywords.pkl')
 
 # Topic Data Calculations
