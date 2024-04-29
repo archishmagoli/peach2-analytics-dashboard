@@ -9,6 +9,7 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 from dash import dash_table
+import re
 
 def hot_topics(column_sums):
     return html.Div(id='hot_topics',
@@ -151,9 +152,9 @@ def engagement_statistics(filtered_df):
                         ], justify="center", align="center", className="h-50"         
                 , style={"height": "100vh", "alignItems": "center"}
             )
-        ], style={'max-width': '100vw', "margin": "1em"})
+        ], style={'maxWidth': '100vw', "margin": "1em"})
         ],
-        style={'margin-right' : '1em'}
+        style={'marginRight' : '1em'}
     )
 
 def posts(sm_df):
@@ -184,21 +185,56 @@ def posts(sm_df):
 
         post_children.append(html.P(row['content']))
 
-        posts.append(html.Div(children=post_children, style={'border': '1px solid black', 'height': '25em', 'max-width': '30em', 
-                                            'min-width': '20em', 'overflow': 'auto', 'margin': '1em'}))
+        posts.append(html.Div(children=post_children, style={'border': '1px solid black', 'height': '25em', 'maxWidth': '30em', 
+                                            'minWidth': '20em', 'overflow': 'auto', 'margin': '1em'}))
 
-    return html.Div(id='posts', children=posts, style={'display': 'flex', 'max-width': '100vw', 
-                                                       'overflow-x': 'auto'})
+    return html.Div(id='posts', children=posts, style={'display': 'flex', 'maxWidth': '100vw', 
+                                                       'overflowX': 'auto'})
 
-def tf_idf(weekly_df):
+def tf_idf(sm_df, weekly_df):
+
+    keywords = []
+
+    # Assuming 'weekly_df' is your DataFrame containing keywords
+    for column in weekly_df.columns:
+        for index, value in weekly_df[column].items():
+            if isinstance(value, str) and any(char.isalpha() for char in value):
+                keywords.append(value)
+
+    # Escape special characters in keywords
+    escaped_keywords = [re.escape(keyword) for keyword in keywords]
+
+    # Create regex pattern to match any of the keywords
+    pattern = '|'.join(escaped_keywords)
+
+    # Filter sm_df based on keywords
+    filtered_df = sm_df[sm_df['actualText'].str.contains(pattern)].reset_index(drop=True)
+
     weekly_df['weekAuthored'] = pd.to_datetime(weekly_df['weekAuthored'])
-    weekly_df['weekAuthored'] = weekly_df['weekAuthored'].dt.strftime('%m/%d/%Y')
+    weekly_df['weekAuthored'] = weekly_df['weekAuthored'].dt.strftime('%m/%d/%Y').copy()
     weekly_df = weekly_df.rename(columns={'weekAuthored' : 'Week Authored'})
 
-    return html.Div(id='tf-idf', children = [
-        html.H4('Hot Topics 🔥', style={'fontStyle': 'italic'}),
-        html.P('A list of the top 20 keywords mentioned in posts across all platforms over a 1-week time frame.'),
-        html.Div(
+    filtered_df = filtered_df.head(15)
+
+    posts = []
+
+    for index, row in filtered_df.iterrows():
+        post_children = []
+        post_children.append(html.Br())
+        post_children.append(html.H5(row['platform'].title(), style={'fontWeight': 'bold'}))
+        post_children.append(html.H6('Author: ' + row['author']))
+        post_children.append(html.A('Link to Post', href=row['url']))
+        post_children.append(html.H6(row['authoredAt'].date()))
+        post_children.append(html.P(row['content']))
+
+        posts.append(html.Div(children=post_children, style={'border': '1px solid black', 'height': '25em', 'maxWidth': '30em', 
+                                            'minWidth': '20em', 'overflow': 'auto', 'margin': '1em', 'overflow':'scroll'}))
+    
+    all_children = []
+
+    all_children.append(html.H4('Hot Topics 🔥', style={'fontStyle': 'italic'}))
+    all_children.append(html.P('A list of the top 20 keywords mentioned in posts across all platforms over a 1-week time frame.'))
+    all_children.append(html.Div(
             id='tf-idf-graph',
             style={'width': '50vw', 'height': '40vh', 'overflow': 'auto', 'border' : '1px solid black'},  # Apply overflow auto to the container
             children=[
@@ -219,8 +255,13 @@ def tf_idf(weekly_df):
                     }
                 )
             ]
-        )
-    ])
+        ))
+    all_children.append(html.Br())
+    all_children.append(html.H4('Related Posts', style={'fontStyle': 'italic'}))
+    all_children.append(html.P('A collection of the posts that contain one or more of the related keywords!'))
+    all_children.append(html.Div(children=posts, style={'width': '50vw', 'overflow': 'auto', 'display' : 'flex'}))
+    
+    return html.Div(id='tf-idf', children = all_children)
 
 
 # def groups_and_communities(sm_df):

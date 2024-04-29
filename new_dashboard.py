@@ -29,7 +29,7 @@ column_sums = column_sums.sort_values(['value'], ascending = False).head(20).res
 app = dash.Dash(external_stylesheets=[dbc.themes.BOOTSTRAP])
 
 maindiv_list = []
-maindiv_list.append(tf_idf(weekly_df))
+maindiv_list.append(tf_idf(sm_df, weekly_df))
 # maindiv_list.append(html.Br())
 maindiv_list.append(engagement_statistics(sm_df))
 # maindiv_list.append(hot_topics(column_sums))
@@ -150,4 +150,4 @@ def graphs(platform_list, account_category, account_identity, account_type, acco
     column_sums.rename(columns={'index': 'topic', 0: 'value'}, inplace=True) # Rename the columns
     column_sums = column_sums.sort_values(['value'], ascending = False).head(20).reset_index()
 
-    return engagement_statistics(result[0]), posts(result[0]), tf_idf(result[1]) #, topic_bar_graph(column_sums),
+    return engagement_statistics(result[0]), posts(result[0]), tf_idf(result[0], result[1]) #, topic_bar_graph(column_sums),
