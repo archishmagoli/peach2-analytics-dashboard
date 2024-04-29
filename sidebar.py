@@ -143,6 +143,7 @@ def dataframe_filter(sm_df, weekly_df, platform_list, account_category, account_
     ## Filter the dataframe based on the selected platforms and the selected labels
     filtered_df = sm_df[sm_df['platform'].isin(platform_list)]
     filtered_weekly_df = weekly_df
+    filtered_weekly_df['weekAuthored'] = pd.to_datetime(filtered_weekly_df['weekAuthored'])
 
     # Account Category
     for account in account_category:
@@ -201,7 +202,6 @@ def dataframe_filter(sm_df, weekly_df, platform_list, account_category, account_
         date_format = '%Y-%m-%d'
         start_date = datetime.strptime(start_date, date_format).date() if isinstance(start_date, str) else start_date
         end_date = datetime.strptime(end_date, date_format).date() if isinstance(end_date, str) else end_date
-        
         filtered_df = filtered_df[(filtered_df['authoredAt'] >=  datetime.combine(start_date, datetime.min.time())) & (filtered_df['authoredAt'].date() <= datetime.combine(end_date, datetime.min.time()))]
         filtered_weekly_df = filtered_weekly_df[(filtered_weekly_df['weekAuthored'] >= datetime.combine(start_date, datetime.min.time())) & (filtered_weekly_df['weekAuthored'].date() <= datetime.combine(end_date, datetime.min.time()))]
 

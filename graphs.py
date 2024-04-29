@@ -198,24 +198,33 @@ def tf_idf(weekly_df):
     weekly_df['weekAuthored'] = weekly_df['weekAuthored'].dt.strftime('%m/%d/%Y')
     weekly_df = weekly_df.rename(columns={'weekAuthored' : 'Week Authored'})
 
-    return html.Div(
-    id='tf-idf',
-    style={'width': '50vw', 'height': '40vh', 'overflow': 'auto'},  # Apply overflow auto to the container
-    children=[
-        dash_table.DataTable(
-            id='table',
-            columns=[{'name': str(col), 'id': str(col)} for col in weekly_df.columns],
-            data=weekly_df.to_dict('records'),
-            style_table={'overflowX': 'auto', 'overflowY': 'auto', 'width': '100%'},  # Set table width to 100%
-            style_cell={
-                'whiteSpace': 'normal',
-                'height': 'auto',
-                'fontFamily': 'inherit',
-                'textAlign': 'center',
-            }
+    return html.Div(id='tf-idf', children = [
+        html.H4('Hot Topics 🔥', style={'fontStyle': 'italic'}),
+        html.P('A list of the top 20 keywords mentioned in posts across all platforms over a 1-week time frame.'),
+        html.Div(
+            id='tf-idf-graph',
+            style={'width': '50vw', 'height': '40vh', 'overflow': 'auto', 'border' : '1px solid black'},  # Apply overflow auto to the container
+            children=[
+                dash_table.DataTable(
+                    id='table',
+                    columns=[{'name': str(col), 'id': str(col)} for col in weekly_df.columns],
+                    data=weekly_df.to_dict('records'),
+                    style_table={'overflowX': 'auto', 'overflowY': 'auto', 'width': '100%'},  # Set table width to 100%
+                    style_cell={
+                        'whiteSpace': 'normal',
+                        'height': 'auto',
+                        'fontFamily': 'inherit',
+                        'textAlign': 'center',
+                        'fontFamily': 'Open Sans, verdana, arial, sans-serif'
+                    },
+                    style_header={
+                        'fontWeight': 'bold'  # Make the header row bold
+                    }
+                )
+            ]
         )
-    ]
-)
+    ])
+
 
 # def groups_and_communities(sm_df):
 #     interesting_authors = ['Survivor Corps', 'Stand for Health Freedom']
