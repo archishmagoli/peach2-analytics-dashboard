@@ -52,9 +52,6 @@ def topic_bar_graph(column_sums):
 
 
 def engagement_statistics(filtered_df):
-    # Pre-processing needed: Raw engagement - sum up all raw values
-    # Normalized engagement - sum up all raw values, divide by the number of followers
-
     total_posts = len(filtered_df.index)
     total_reactions = sum(filtered_df['engagementRaw'])
     platformList = list(filtered_df['platform'].unique())
@@ -150,13 +147,15 @@ def engagement_statistics(filtered_df):
                 dbc.Row(
                         [
                             html.H4(id='Engagement Statistics', children='Engagement Statistics', style={'fontStyle': 'italic'}),
+                            html.P('The number of reactions and comments across all platforms.'),
                             html.Div(id='statistics', 
                                      children=values, style={'border': '1px solid black'}), 
                         ], justify="center", align="center", className="h-50"         
                 , style={"height": "100vh", "alignItems": "center"}
             )
         ], style={'max-width': '100vw', "margin": "1em"})
-        ]
+        ],
+        style={'margin-right' : '1em'}
     )
 
 def posts(sm_df):
