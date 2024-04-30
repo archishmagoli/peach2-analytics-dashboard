@@ -9,7 +9,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 from style import CONTENT_STYLE
 from sidebar import sidebar, dataframe_filter
-from graphs import hot_topics, topic_bar_graph, engagement_statistics, posts, tf_idf
+from graphs import engagement_statistics, posts, tf_idf, groups_and_communities
 
 sm_df = pd.read_pickle('updated_testing_data.pkl')
 weekly_df = pd.read_pickle('keywords.pkl')
@@ -46,10 +46,13 @@ maindiv = html.Div(
                         style={"display": "inline-flex", "alignItems": "center", "gap": "2em"}),
                 html.Div(children=[html.H4(id='New and Popular', children='See What\'s Popular', style={'fontStyle': 'italic', 'marginTop': '1em'}), 
                                    html.P('A collection of the most popular posts across platforms by the number of reactions, normalized by the number of followers of the author account.'),
-                                   posts(sm_df)], style={"max-width": "100vw"}),
+                                   posts(sm_df)], style={"maxWidth": "100vw"}),
                 html.Br(),
                 html.Hr(style={'borderTop': '2px solid black'}),
-                html.H2(children='Content and Engagement', style={"textAlign":"left"})
+                html.H2(children='Content and Engagement', style={"textAlign":"left"}),
+                html.H4(children='Groups and Communities', style={"textAlign":"left", 'fontStyle' : 'italic'}),
+                html.P(children='A collection of posts from various Facebook Groups.', style={'textAlign': 'left'}),
+                html.Div(children=[groups_and_communities(sm_df)])
             ]
         )
     ],
@@ -101,6 +104,7 @@ def date_options(visibility_state):
         Output("engagement", "children"),
         Output("posts", "children"),
         Output("tf-idf", "children"),
+        Output("groups-communities", "children"),
     
         # Platform Selection
         Input("platform-selection", "value"),
@@ -150,4 +154,4 @@ def graphs(platform_list, account_category, account_identity, account_type, acco
     column_sums.rename(columns={'index': 'topic', 0: 'value'}, inplace=True) # Rename the columns
     column_sums = column_sums.sort_values(['value'], ascending = False).head(20).reset_index()
 
-    return engagement_statistics(result[0]), posts(result[0]), tf_idf(result[0], result[1]) #, topic_bar_graph(column_sums),
+    return engagement_statistics(result[0]), posts(result[0]), tf_idf(result[0], result[1]), groups_and_communities(result[0]) #, topic_bar_graph(column_sums),

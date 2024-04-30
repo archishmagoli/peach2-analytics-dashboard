@@ -265,7 +265,6 @@ def tf_idf(sm_df, weekly_df):
     
     return html.Div(id='tf-idf', children = all_children)
 
-
 def groups_and_communities(sm_df):
     interesting_authors = ['COVID-19 Long Haulers Support', 'Survivor Corps', 
                            'Vaccines save lives', 'COVID-19 Novel Coronavirus FACTS', 
@@ -282,5 +281,24 @@ def groups_and_communities(sm_df):
                            'America First Tea Party', 'The Prayer Wall', 'TERMINÓ 🧑\u200d🦽🧑\u200d🦽🧑\u200d🦽🧑\u200d🦽', 
                            'Coronavirus Updates from NBC News']
 
-    sm_df = sm_df[sm_df['author'] in interesting_authors]
+    sm_df = sm_df[sm_df['author'].isin(interesting_authors)]
+
+    posts = []
+
+    for index, row in sm_df.iterrows():
+        post_children = []
+        post_children.append(html.Br())
+        post_children.append(html.H5(row['platform'].title(), style={'fontWeight': 'bold'}))
+        post_children.append(html.H6('Author: ' + row['author']))
+        post_children.append(html.A('Link to Post', href=row['url']))
+        post_children.append(html.H6(row['authoredAt'].date()))
+        post_children.append(html.P(row['content']))
+
+        posts.append(html.Div(children=post_children, style={'border': '1px solid black', 'height': '25em', 
+                                            'minWidth': '20em', 'maxWidth': '30em', 'overflow': 'auto', 'margin': '1em', 'overflow':'scroll'}))
     
+    all_children = []
+
+    all_children.append(html.Div(children=posts, style={'width': '50vw', 'overflow': 'auto', 'display' : 'flex'}))
+
+    return html.Div(id='groups-communities', children = all_children, style={'justifyContent' : 'left'})
