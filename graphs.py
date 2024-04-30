@@ -11,45 +11,6 @@ import plotly.graph_objects as go
 from dash import dash_table
 import re
 
-def hot_topics(column_sums):
-    return html.Div(id='hot_topics',
-            children=[
-                html.H4(id='Hot Topics', children='Keywords and Trends', style={'fontStyle': 'italic'}),
-                dcc.Graph(
-                    id='topic-bar-graph',
-                    figure = px.bar(
-                        column_sums, 
-                        x=column_sums['topic'],
-                        y=column_sums['value'],
-                        title='Keyword Breakdown of Social Media Posts',
-                        color_discrete_sequence=px.colors.qualitative.Prism),
-                    style = {'border': '1px solid black', 'width': '5em'}
-                ),
-            ],
-            style={'textAlign': 'center', 'margin': '1em'}
-        )
-
-def topic_bar_graph(column_sums):
-    topic_bar_graph = px.bar(
-        column_sums, 
-        x='topic', 
-        y='value',
-        title='Keyword Breakdown of Social Media Posts', 
-        color='topic',
-        color_discrete_sequence=px.colors.qualitative.Prism
-    )
-    topic_bar_graph.update_layout(
-        font_family='Open Sans',
-        font_color='black',
-        title_x=0.5,
-        legend_title="Topics",
-        xaxis_title="Topic",
-        yaxis_title="Number of Posts"
-    )
-
-    return topic_bar_graph
-
-
 def engagement_statistics(filtered_df):
     total_posts = len(filtered_df.index)
     total_reactions = sum(filtered_df['engagementRaw'])
@@ -210,13 +171,14 @@ def tf_idf(sm_df, weekly_df):
     filtered_df = sm_df[sm_df['actualText'].str.contains(pattern)].reset_index(drop=True)
 
     weekly_df['weekAuthored'] = pd.to_datetime(weekly_df['weekAuthored'])
-    weekly_df['weekAuthored'] = weekly_df['weekAuthored'].dt.strftime('%m/%d/%Y').copy()
+    weekly_df.loc[:, 'weekAuthored'] = weekly_df['weekAuthored'].dt.strftime('%m/%d/%Y')
+
     weekly_df = weekly_df.rename(columns={'weekAuthored' : 'Week Authored'})
 
     authors_to_remove = ['Survivor Corps', 'COVID-19 Long Haulers Support', 'A Voice for Choice']
     filtered_df = filtered_df[~filtered_df['author'].isin(authors_to_remove)]
 
-    filtered_df = filtered_df.head(100)
+    filtered_df = filtered_df.head(50)
 
     posts = []
 
@@ -298,7 +260,105 @@ def groups_and_communities(sm_df):
                                             'minWidth': '20em', 'maxWidth': '30em', 'overflow': 'auto', 'margin': '1em', 'overflow':'scroll'}))
     
     all_children = []
-
+    all_children.append(html.H4(children='Groups and Communities', style={"textAlign":"left", 'fontStyle' : 'italic'}))
+    all_children.append(html.P(children='A collection of posts from various Facebook Groups.', style={'textAlign': 'left'}))
     all_children.append(html.Div(children=posts, style={'width': '50vw', 'overflow': 'auto', 'display' : 'flex'}))
 
     return html.Div(id='groups-communities', children = all_children, style={'justifyContent' : 'left'})
+
+def symptoms(weekly_df):
+    grouped_symptoms = {
+        "fever": 0,
+        "headache": 0,
+        "cough": 0,
+        "lost smell or taste": 0,
+        "shortness of breath": 0,
+        "fatigue": 0,
+        "sore throat": 0,
+        "congestion or runny nose": 0,
+        "muscle or body aches": 0,
+        "nausea or vomiting": 0,
+        "diarrhea": 0,
+        "chills or shivering": 0,
+        "head or chest pressure": 0,
+        "pink eye": 0,
+        "rash": 0,
+        "hair loss": 0,
+        "fainting or dizziness": 0,
+        "seizures": 0,
+        "confusion": 0,
+        "abdominal pain": 0,
+        "loss of appetite": 0,
+        "loss of energy": 0,
+        "muscle or joint pain": 0,
+        "difficulty sleeping or insomnia": 0,
+        "feeling disoriented": 0,
+        "numbness or tingling": 0,
+        "chest pain": 0,
+        "swelling or edema": 0,
+        "bruising": 0,
+        "loss of coordination": 0,
+        "difficulty speaking": 0,
+        "irregular heartbeat": 0,
+        "frequent urination": 0,
+        "blood in urine": 0,
+        "skin discoloration": 0,
+        "decreased urination": 0,
+        "swollen glands": 0,
+        "loss of taste": 0,
+        "chapped lips": 0,
+        "puffy eyes": 0,
+        "weight gain": 0,
+        "unexplained weight loss" : 0,
+        "hoarse voice": 0,
+        "mood changes": 0,
+        "cognitive issues": 0,
+        "poor balance": 0,
+        "leg swelling": 0,
+        "bruising easily": 0,
+        "hair thinning": 0,
+        "changes in vision": 0,
+        "dry skin": 0,
+        "weakness": 0,
+        "tremors": 0,
+        "depression": 0,
+        "anxiety": 0,
+        "heart palpitations": 0
+    }
+
+    for index, row in weekly_df.iterrows():
+        symptom_set = row['symptoms']
+        for symptom in symptom_set:
+            grouped_symptoms[symptom] += 1
+
+    symptom_df = pd.DataFrame(grouped_symptoms.items(), columns=['symptom', 'count']).sort_values(by='count', ascending=False)
+
+    symptom_graph = px.bar(
+        symptom_df, 
+        x='symptom', 
+        y='count',
+        title='Sharing of Symptoms', 
+        color='symptom',
+        color_discrete_sequence=px.colors.qualitative.Prism
+    )
+    symptom_graph.update_layout(
+        font_family='Open Sans',
+        font_color='black',
+        title_x=0.5,
+        legend_title="Symptoms",
+        xaxis_title="Symptom",
+        yaxis_title="Number of Occurrences"
+    )
+
+    return html.Div(id='symptoms',
+        children=[
+            html.H4(children='Sharing of COVID Symptoms', style={'textAlign' : 'left', 'fontStyle' : 'italic'}),
+            html.P(children='Displays the types of symptoms mentioned across social media platforms.', style={'textAlign' : 'left'}),
+            dcc.Graph(
+                id='symptom-bar-graph',
+                figure = symptom_graph,
+                style = {'border': '1px solid black', 'width': '30vw'}
+            ),
+        ],
+        style={'marginLeft' : '5em', 'marginBottom' : '5em'}
+    )

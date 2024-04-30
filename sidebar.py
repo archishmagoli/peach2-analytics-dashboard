@@ -139,11 +139,12 @@ sidebar = html.Div(
     style=SIDEBAR_STYLE,
 )
 
-def dataframe_filter(sm_df, weekly_df, platform_list, account_category, account_identity, account_type, account_location, time_frame, relative_date, start_date, end_date):
+def dataframe_filter(sm_df, weekly_df, symptoms_df, platform_list, account_category, account_identity, account_type, account_location, time_frame, relative_date, start_date, end_date):
     ## Filter the dataframe based on the selected platforms and the selected labels
     filtered_df = sm_df[sm_df['platform'].isin(platform_list)]
     filtered_weekly_df = weekly_df
     filtered_weekly_df['weekAuthored'] = pd.to_datetime(filtered_weekly_df['weekAuthored'])
+    filtered_symptoms_df = symptoms_df
 
     # Account Category
     for account in account_category:
@@ -197,6 +198,7 @@ def dataframe_filter(sm_df, weekly_df, platform_list, account_category, account_
                 start_date = start_date.date()
             filtered_df = filtered_df[filtered_df['authoredAt'] >= datetime.combine(start_date, datetime.min.time())]
             filtered_weekly_df = filtered_weekly_df[filtered_weekly_df['weekAuthored'] >= datetime.combine(start_date, datetime.min.time())]
+            filtered_symptoms_df = symptoms_df[symptoms_df['weekAuthored'] >= datetime.combine(start_date, datetime.min.time())]
 
     else:
         date_format = '%Y-%m-%d'
@@ -204,5 +206,6 @@ def dataframe_filter(sm_df, weekly_df, platform_list, account_category, account_
         end_date = datetime.strptime(end_date, date_format).date() if isinstance(end_date, str) else end_date
         filtered_df = filtered_df[(filtered_df['authoredAt'] >=  datetime.combine(start_date, datetime.min.time())) & (filtered_df['authoredAt'].date() <= datetime.combine(end_date, datetime.min.time()))]
         filtered_weekly_df = filtered_weekly_df[(filtered_weekly_df['weekAuthored'] >= datetime.combine(start_date, datetime.min.time())) & (filtered_weekly_df['weekAuthored'].date() <= datetime.combine(end_date, datetime.min.time()))]
+        filtered_symptoms_df = symptoms_df[symptoms_df['weekAuthored'] >= datetime.combine(start_date, datetime.min.time())]
 
-    return [filtered_df, filtered_weekly_df, start_date, end_date]
+    return [filtered_df, filtered_weekly_df, filtered_symptoms_df, start_date, end_date]
