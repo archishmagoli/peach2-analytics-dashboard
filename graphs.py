@@ -192,7 +192,6 @@ def posts(sm_df):
                                                        'overflowX': 'auto'})
 
 def tf_idf(sm_df, weekly_df):
-
     keywords = []
 
     # Assuming 'weekly_df' is your DataFrame containing keywords
@@ -267,5 +266,21 @@ def tf_idf(sm_df, weekly_df):
     return html.Div(id='tf-idf', children = all_children)
 
 
-# def groups_and_communities(sm_df):
-#     interesting_authors = ['Survivor Corps', 'Stand for Health Freedom']
+def groups_and_communities(sm_df):
+    interesting_authors = ['COVID-19 Long Haulers Support', 'Survivor Corps', 
+                           'Vaccines save lives', 'COVID-19 Novel Coronavirus FACTS', 
+                           '¡MÉDICOS POR LA VERDAD!', 'Black News Network (BNN)', 
+                           'COVID19: Real Talk from Health Care Workers around the Globe', 
+                           'Black Educators', 'Covid Wellness Clinic', 
+                           'Coronavirus Updates for: Statesboro, Georgia & Surrounding Counties', 
+                           'Athens GA COVID-19 Resources and Discussion', 'Georgia Trump Republicans', 
+                           "Skip Mason's Vanishing Black Atlanta History", 'DeKalb Strong', 
+                           'COVID-19 Watch North GA w/ Help & Resources', 
+                           'Albany, GA Area Happenings Over 21', 'Albany GA: Home Is Where The Heart Is', 
+                           'Type 1 Diabetes Recipes & Food Ideas', 
+                           'Kimono My House (Virtual House Concerts)', 'Dank Diabetes Memes Diabuddies', 
+                           'America First Tea Party', 'The Prayer Wall', 'TERMINÓ 🧑\u200d🦽🧑\u200d🦽🧑\u200d🦽🧑\u200d🦽', 
+                           'Coronavirus Updates from NBC News']
+
+    sm_df = sm_df[sm_df['author'] in interesting_authors]
+    
