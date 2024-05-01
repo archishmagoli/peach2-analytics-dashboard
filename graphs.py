@@ -205,7 +205,7 @@ def tf_idf(sm_df, weekly_df):
 
     all_children.append(html.Div(
             id='tf-idf-graph',
-            style={'width': '50vw', 'maxHeight': '40vh', 'overflow': 'auto', 'border' : '1px solid black'},  # Apply overflow auto to the container
+            style={'width': '50vw', 'maxHeight': '40vh', 'display': 'inline-block', 'verticalAlign': 'top', 'overflow': 'auto', 'border' : '1px solid black'},  # Apply overflow auto to the container
             children=[
                 dash_table.DataTable(
                     id='table',

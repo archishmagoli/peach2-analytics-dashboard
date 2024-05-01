@@ -16,16 +16,16 @@ weekly_df = pd.read_pickle('keywords.pkl')
 symptoms_df = pd.read_pickle('weekly_tf_idf.pkl')
 
 # Topic Data Calculations
-topics = list(set(val for sublist in sm_df['topics'] for val in sublist)) # Get the unique topics
-column_sums = {} # Create a dictionary to store the topic sums
-for topic in topics:
-    keyword_sum = column_sums[topic] if topic in column_sums.keys() else 0
-    for topic_list in sm_df['topics']:
-        keyword_sum += topic_list.count(topic)
-    column_sums[topic] = keyword_sum # Add a column for each topic to the dataframe
-column_sums = pd.DataFrame(column_sums, index=[0]).T.reset_index() # Convert the dictionary to a dataframe
-column_sums.rename(columns={'index': 'topic', 0: 'value'}, inplace=True) # Rename the columns
-column_sums = column_sums.sort_values(['value'], ascending = False).head(20).reset_index()
+# topics = list(set(val for sublist in sm_df['topics'] for val in sublist)) # Get the unique topics
+# column_sums = {} # Create a dictionary to store the topic sums
+# for topic in topics:
+#     keyword_sum = column_sums[topic] if topic in column_sums.keys() else 0
+#     for topic_list in sm_df['topics']:
+#         keyword_sum += topic_list.count(topic)
+#     column_sums[topic] = keyword_sum # Add a column for each topic to the dataframe
+# column_sums = pd.DataFrame(column_sums, index=[0]).T.reset_index() # Convert the dictionary to a dataframe
+# column_sums.rename(columns={'index': 'topic', 0: 'value'}, inplace=True) # Rename the columns
+# column_sums = column_sums.sort_values(['value'], ascending = False).head(20).reset_index()
 
 app = dash.Dash(external_stylesheets=[dbc.themes.BOOTSTRAP])
 
@@ -52,14 +52,14 @@ maindiv = html.Div(
                 html.Hr(style={'borderTop': '2px solid black'}),
                 html.H2(children='Content and Engagement', style={"textAlign":"left"}),
                 html.Div(children=[groups_and_communities(sm_df), symptoms(symptoms_df)], style={'display' : 'flex', 'gap' : '2em'}),
-                html.Div(children=[news_engagement(sm_df)], style={'display' : 'flex', 'gap' : '2em'})
+                html.Div(children=[news_engagement(sm_df)], style={'display': 'flex', 'verticalAlign': 'top'})
             ]
         )
     ],
     style = CONTENT_STYLE
 )
 
-app.layout = html.Div(children=[sidebar, maindiv], style={'display' : 'flex', 'margin' : '2em'})
+app.layout = html.Div(children=[sidebar, maindiv], style={'display' : 'flex', 'gap' : '2em'})
 
 # Account Categories - option handling
 @app.callback(
