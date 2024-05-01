@@ -9,7 +9,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 from style import CONTENT_STYLE
 from sidebar import sidebar, dataframe_filter
-from graphs import engagement_statistics, posts, tf_idf, groups_and_communities, symptoms, news_engagement
+from graphs import engagement_statistics, posts, tf_idf, groups_and_communities, symptoms, news_engagement, news_posts
 
 sm_df = pd.read_pickle('updated_testing_data.pkl')
 weekly_df = pd.read_pickle('keywords.pkl')
@@ -52,7 +52,8 @@ maindiv = html.Div(
                 html.Hr(style={'borderTop': '2px solid black'}),
                 html.H2(children='Content and Engagement', style={"textAlign":"left"}),
                 html.Div(children=[groups_and_communities(sm_df), symptoms(symptoms_df)], style={'display' : 'flex', 'gap' : '2em'}),
-                html.Div(children=[news_engagement(sm_df)], style={'display': 'flex', 'verticalAlign': 'top'})
+                html.Div(children=[news_engagement(sm_df)], style={'display': 'flex', 'verticalAlign': 'top'}),
+                html.Div(children=[news_posts(sm_df)], style={'display': 'flex', 'verticalAlign': 'top'})
             ]
         )
     ],
@@ -107,6 +108,7 @@ def date_options(visibility_state):
         Output("groups-communities", "children"),
         Output('symptoms', 'children'),
         Output('news-engagement', 'children'),
+        Output('news-posts', 'children'),
     
         # Platform Selection
         Input("platform-selection", "value"),
@@ -142,4 +144,4 @@ def graphs(platform_list, account_category, account_identity, account_type, acco
     filtered_df = filtered_df.groupby(['authoredAt', 'platform']).agg({'positive': 'mean', 'negative': 'mean', 'compound': 'mean'}).reset_index()
     filtered_df['compound_7day'] = filtered_df['compound'].rolling(window=7).mean()
 
-    return engagement_statistics(result[0]), posts(result[0]), tf_idf(result[0], result[1]), groups_and_communities(result[0]), symptoms(result[2]), news_engagement(result[0])
+    return engagement_statistics(result[0]), posts(result[0]), tf_idf(result[0], result[1]), groups_and_communities(result[0]), symptoms(result[2]), news_engagement(result[0]), news_posts(result[0])

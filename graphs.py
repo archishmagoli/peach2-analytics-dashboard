@@ -419,3 +419,29 @@ def news_engagement(sm_df):
     all_children.append(html.Div(children=dcc.Graph(figure=figure), style={'border' : '1px solid black'}))
     
     return html.Div(id='news-engagement', children=all_children, style={'width': '45vw'})
+
+
+def news_posts(sm_df):
+    all_children = []
+
+    post_count_df = sm_df[sm_df['labels'].apply(lambda x: 'news' in x or 'institutional' in x)]
+    posts = []
+
+    for index, row in post_count_df.iterrows():
+        post_children = []
+        post_children.append(html.Br())
+        post_children.append(html.H5(row['platform'].title(), style={'fontWeight': 'bold'}))
+        post_children.append(html.H6('Author: ' + row['author']))
+        post_children.append(html.A('Link to Post', href=row['url']))
+        post_children.append(html.H6(row['authoredAt'].date()))
+        post_children.append(html.P(row['content']))
+
+        posts.append(html.Div(children=post_children, style={'border': '1px solid black', 'height': '25em', 
+                                            'minWidth': '20em', 'maxWidth': '30em', 'overflow': 'auto', 'margin': '1em', 'overflow':'scroll'}))
+    
+    all_children.append(html.Br())
+    all_children.append(html.P(children="Informational News + Institutional posts across all platforms.", style={'textAlign': 'left'}))
+    all_children.append(html.Div(children=posts, style={'maxWidth': '80vw', 'overflowX': 'auto', 'display' : 'flex'}))
+
+    return html.Div(id='news-posts', children = all_children, style={'justifyContent' : 'left'})
+
