@@ -399,7 +399,7 @@ def symptoms(weekly_df):
 
     return html.Div(id='symptoms',
         children=[
-            html.H4(children='Sharing of COVID Symptoms', style={'textAlign' : 'left', 'fontStyle' : 'italic'}),
+            html.H4(children='Sharing of COVID Symptoms', style={'textAlign' : 'left', 'fontStyle' : 'italic', 'marginTop' : '1em'}),
             html.P(children='Displays the types of symptoms mentioned across social media platforms.', style={'textAlign' : 'left'}),
             dcc.Graph(
                 id='symptom-bar-graph',
@@ -422,6 +422,7 @@ def news_engagement(sm_df):
 
 def news_engagement(sm_df):
     all_children = []
+
     all_children.append(html.H4(children='News and Institutions', style={"textAlign":"left", 'fontStyle' : 'italic'}))
     all_children.append(html.P(children="'Viral' News Cycles: recording post trends from news and institutional accounts.", style={'textAlign': 'left'}))
 
@@ -429,7 +430,7 @@ def news_engagement(sm_df):
     post_count_df = sm_df[sm_df['labels'].apply(lambda x: 'news' in x or 'institutional' in x)]
 
     # Calculate post counts
-    post_count = post_count_df.groupby('authoredAt').size().rolling(window=7).mean()
+    post_count = post_count_df.groupby('authoredAt').size()
 
     figure = px.line(x=post_count.index, y=post_count.values,
                         title='News + Institutional Posts Over Time', 
