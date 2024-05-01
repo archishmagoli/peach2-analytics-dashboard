@@ -51,14 +51,15 @@ maindiv = html.Div(
                 html.Br(),
                 html.Hr(style={'borderTop': '2px solid black'}),
                 html.H2(children='Content and Engagement', style={"textAlign":"left"}),
-                html.Div(children=[groups_and_communities(sm_df), symptoms(symptoms_df)], style={'display' : 'flex'})
+                html.Div(children=[groups_and_communities(sm_df), symptoms(symptoms_df)], style={'display' : 'flex', 'gap' : '2em'})
             ]
         )
     ],
     style = CONTENT_STYLE
 )
 
-app.layout = html.Div([sidebar, maindiv])
+app.layout = html.Div([sidebar, maindiv], style={'display' : 'flex', 
+                                                 'margin' : '2em'})
 
 # Account Categories - option handling
 @app.callback(

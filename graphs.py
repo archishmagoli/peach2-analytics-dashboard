@@ -170,9 +170,11 @@ def tf_idf(sm_df, weekly_df):
     # Filter sm_df based on keywords
     filtered_df = sm_df[sm_df['actualText'].str.contains(pattern)].reset_index(drop=True)
 
+   # Convert to datetime
     weekly_df['weekAuthored'] = pd.to_datetime(weekly_df['weekAuthored'])
-    weekly_df.loc[:, 'weekAuthored'] = weekly_df['weekAuthored'].dt.strftime('%m/%d/%Y')
 
+    # Extract date
+    weekly_df['Week Authored'] = weekly_df['weekAuthored'].dt.strftime('%m/%d/%Y')
     weekly_df = weekly_df.rename(columns={'weekAuthored' : 'Week Authored'})
 
     authors_to_remove = ['Survivor Corps', 'COVID-19 Long Haulers Support', 'A Voice for Choice']
@@ -200,7 +202,7 @@ def tf_idf(sm_df, weekly_df):
     all_children.append(html.P('A list of the top 20 keywords mentioned in posts across all platforms over a 1-week time frame.'))
     all_children.append(html.Div(
             id='tf-idf-graph',
-            style={'width': '50vw', 'height': '40vh', 'overflow': 'auto', 'border' : '1px solid black'},  # Apply overflow auto to the container
+            style={'width': '50vw', 'maxHeight': '40vh', 'overflow': 'auto', 'border' : '1px solid black'},  # Apply overflow auto to the container
             children=[
                 dash_table.DataTable(
                     id='table',
@@ -271,59 +273,70 @@ def symptoms(weekly_df):
         "fever": 0,
         "headache": 0,
         "cough": 0,
-        "lost smell or taste": 0,
-        "shortness of breath": 0,
+        "shortness_of_breath": 0,
         "fatigue": 0,
-        "sore throat": 0,
-        "congestion or runny nose": 0,
-        "muscle or body aches": 0,
-        "nausea or vomiting": 0,
+        "sore_throat": 0,
+        "congestion": 0,
+        "muscle_aches": 0,
+        "nausea_vomiting": 0,
         "diarrhea": 0,
-        "chills or shivering": 0,
-        "head or chest pressure": 0,
-        "pink eye": 0,
+        "chills": 0,
+        "chest_head_pressure": 0,
+        "pink_eye": 0,
         "rash": 0,
-        "hair loss": 0,
-        "fainting or dizziness": 0,
+        "dizziness": 0,
         "seizures": 0,
         "confusion": 0,
-        "abdominal pain": 0,
-        "loss of appetite": 0,
-        "loss of energy": 0,
-        "muscle or joint pain": 0,
-        "difficulty sleeping or insomnia": 0,
-        "feeling disoriented": 0,
-        "numbness or tingling": 0,
-        "chest pain": 0,
-        "swelling or edema": 0,
+        "abdominal_pain": 0,
+        "loss_of_appetite": 0,
+        "muscle_joint_pain": 0,
+        "difficulty_sleeping": 0,
+        "feeling_disoriented": 0,
+        "numbness_tingling": 0,
+        "chest_pain": 0,
+        "swelling_edema": 0,
         "bruising": 0,
-        "loss of coordination": 0,
-        "difficulty speaking": 0,
-        "irregular heartbeat": 0,
-        "frequent urination": 0,
-        "blood in urine": 0,
-        "skin discoloration": 0,
-        "decreased urination": 0,
-        "swollen glands": 0,
-        "loss of taste": 0,
-        "chapped lips": 0,
-        "puffy eyes": 0,
-        "weight gain": 0,
-        "unexplained weight loss" : 0,
-        "hoarse voice": 0,
-        "mood changes": 0,
-        "cognitive issues": 0,
-        "poor balance": 0,
-        "leg swelling": 0,
-        "bruising easily": 0,
-        "hair thinning": 0,
-        "changes in vision": 0,
-        "dry skin": 0,
+        "loss_of_coordination": 0,
+        "difficulty_speaking": 0,
+        "frequent_urination": 0,
+        "blood_in_urine": 0,
+        "skin_discoloration": 0,
+        "decreased_urination": 0,
+        "swollen_glands": 0,
+        "hair_loss": 0,
+        "chapped_lips": 0,
+        "puffy_eyes": 0,
+        "weight_gain": 0,
+        "hoarse_voice": 0,
+        "mood_changes": 0,
+        "cognitive_issues": 0,
+        "leg_swelling": 0,
+        "hair_thinning": 0,
+        "dry_skin": 0,
         "weakness": 0,
         "tremors": 0,
         "depression": 0,
         "anxiety": 0,
-        "heart palpitations": 0
+        "irritability": 0,
+        "insomnia": 0,
+        "feeling_cold": 0,
+        "feeling_hot": 0,
+        "difficulty_breathing": 0,
+        "chest_tightness": 0,
+        "palpitations": 0,
+        "lightheadedness": 0,
+        "severe_headache": 0,
+        "stroke_heart_attack": 0,
+        "vision_loss": 0,
+        "paralysis": 0,
+        "aphasia": 0,
+        "weakness_in_arms": 0,
+        "weakness_in_legs": 0,
+        "facial_droop": 0,
+        "slurred_speech": 0,
+        "difficulty_swallowing": 0,
+        "decreased_sense_of_smell": 0,
+        "decreased_sense_of_taste": 0
     }
 
     for index, row in weekly_df.iterrows():
@@ -347,7 +360,7 @@ def symptoms(weekly_df):
         title_x=0.5,
         legend_title="Symptoms",
         xaxis_title="Symptom",
-        yaxis_title="Number of Occurrences"
+        yaxis_title="Number of Weeks Observed"
     )
 
     return html.Div(id='symptoms',
@@ -360,5 +373,5 @@ def symptoms(weekly_df):
                 style = {'border': '1px solid black', 'width': '30vw'}
             ),
         ],
-        style={'marginLeft' : '5em', 'marginBottom' : '5em'}
+        style={'marginBottom' : '5em', 'marginRight' : '5em'}
     )
