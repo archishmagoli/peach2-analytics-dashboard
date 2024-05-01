@@ -10,6 +10,8 @@ import plotly.graph_objects as go
 from style import CONTENT_STYLE
 from sidebar import sidebar, dataframe_filter
 from graphs import engagement_statistics, posts, tf_idf, groups_and_communities, symptoms, news_engagement, news_posts
+from flask import Flask
+from flask_cors import CORS
 
 sm_df = pd.read_pickle('updated_testing_data.pkl')
 weekly_df = pd.read_pickle('keywords.pkl')
@@ -27,7 +29,12 @@ symptoms_df = pd.read_pickle('weekly_tf_idf.pkl')
 # column_sums.rename(columns={'index': 'topic', 0: 'value'}, inplace=True) # Rename the columns
 # column_sums = column_sums.sort_values(['value'], ascending = False).head(20).reset_index()
 
-app = dash.Dash(external_stylesheets=[dbc.themes.BOOTSTRAP])
+server = Flask(__name__)
+
+app = dash.Dash(server=server, suppress_callback_exceptions=True, external_stylesheets=[dbc.themes.BOOTSTRAP], serve_locally=False)
+app.title = 'Social Media Analytics Dashboard'
+server = app.server
+CORS(server) 
 
 maindiv_list = []
 maindiv_list.append(tf_idf(sm_df, weekly_df))
