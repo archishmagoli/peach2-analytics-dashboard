@@ -96,7 +96,7 @@ def engagement_statistics(filtered_df):
     values.append(html.H4(f'{total_reactions:,} ' + 'Total Reactions'))
     values.append(html.H6(f'{week_reactions:,} ' + 'Reactions This Past Week'))
 
-    values.append(html.H4(f'{total_comments:,} ' + 'Comments Last Week'))
+    values.append(html.H4(f'{total_comments:,} ' + 'Total Comments'))
     values.append(html.H6(f'{week_comments:,} ' + 'Comments This Past Week'))
 
     if 'facebook' in platformList:
