@@ -174,7 +174,6 @@ def tf_idf(sm_df, weekly_df):
     weekly_df['weekAuthored'] = pd.to_datetime(weekly_df['weekAuthored'])
 
     # Extract date
-    weekly_df['Week Authored'] = weekly_df['weekAuthored'].dt.strftime('%m/%d/%Y')
     weekly_df = weekly_df.rename(columns={'weekAuthored' : 'Week Authored'})
 
     authors_to_remove = ['Survivor Corps', 'COVID-19 Long Haulers Support', 'A Voice for Choice']
@@ -200,6 +199,10 @@ def tf_idf(sm_df, weekly_df):
 
     all_children.append(html.H4('Hot Topics 🔥', style={'fontStyle': 'italic'}))
     all_children.append(html.P('A list of the top 20 keywords mentioned in posts across all platforms over a 1-week time frame.'))
+
+    weekly_df.columns = ['Week Authored'] + [f'{i}' for i in range(1, len(weekly_df.columns))]
+    weekly_df['Week Authored'] = weekly_df['Week Authored'].dt.strftime('%m/%d/%Y')
+
     all_children.append(html.Div(
             id='tf-idf-graph',
             style={'width': '50vw', 'maxHeight': '40vh', 'overflow': 'auto', 'border' : '1px solid black'},  # Apply overflow auto to the container
@@ -373,13 +376,47 @@ def symptoms(weekly_df):
                 style = {'border': '1px solid black', 'width': '30vw'}
             ),
         ],
-        style={'marginBottom' : '5em', 'marginRight' : '5em'}
+        style={'marginRight' : '5em'}
     )
 
-def news_engagement(weekly_df):
+def news_engagement(sm_df):
 
-    ## TO-DO: Questiona about COVID; News and Institutions -- 7-day post graph, reactions to news posts, topic analysis -- informational news and institutional posts
+    ## TO-DO: Questions about COVID; reactions to news posts, topic analysis -- informational news and institutional posts
 
+   # Drop NaN values from the 'labels' column
+    sm_df.dropna(subset=['labels'], inplace=True)
+
+    # Convert NaN values to empty string in the 'labels' column
+    sm_df['labels'].fillna('', inplace=True)
+
+def news_engagement(sm_df):
     all_children = []
     all_children.append(html.H4(children='News and Institutions', style={"textAlign":"left", 'fontStyle' : 'italic'}))
-    all_children.append(html.P(children="Identifying 'viral' news cycles - a record of the number of posts marked as 'news' or are from trusted institutions.", style={'textAlign': 'left'}))
+    all_children.append(html.P(children="'Viral' News Cycles: recording post trends from news and institutional accounts.", style={'textAlign': 'left'}))
+
+    # Filter the DataFrame
+    post_count_df = sm_df[sm_df['labels'].apply(lambda x: 'news' in x or 'institutional' in x)]
+
+    # Calculate post counts
+    post_count = post_count_df.groupby('authoredAt').size().rolling(window=7).mean()
+
+    figure = px.line(x=post_count.index, y=post_count.values,
+                        title='News + Institutional Posts Over Time', 
+                        labels={'authoredAt':'Date', 'value': 'Post Count'}
+                    )
+
+    figure.update_traces(line_color='#0053a0')
+    figure.update_layout(
+        title='News + Institutional Posts Over Time',
+        xaxis_title='Date',
+        yaxis_title='Post Count',
+        legend_title_text='Post Count',
+        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
+        font_family='Open Sans',
+        font_color='black',
+        title_x=0.5
+    )
+    
+    all_children.append(html.Div(children=dcc.Graph(figure=figure), style={'border' : '1px solid black'}))
+    
+    return html.Div(id='news-engagement', children=all_children, style={'marginTop': '2em', 'width': '45vw'})
