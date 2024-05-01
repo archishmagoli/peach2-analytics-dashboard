@@ -73,15 +73,15 @@ def select_all_none_category(all_selected, options):
     return all_or_none
 
 # COM-B option handling
-@app.callback(
-    Output("com-b-components", "value"),
-    [Input("all-or-none-com-b", "value")],
-    [State("com-b-components", "options")],
-)
-def select_all_none_category(all_selected, options):
-    all_or_none = []
-    all_or_none = [option["value"] for option in options if all_selected]
-    return all_or_none
+# @app.callback(
+#     Output("com-b-components", "value"),
+#     [Input("all-or-none-com-b", "value")],
+#     [State("com-b-components", "options")],
+# )
+# def select_all_none_category(all_selected, options):
+#     all_or_none = []
+#     all_or_none = [option["value"] for option in options if all_selected]
+#     return all_or_none
 
 # Callback for dates
 @app.callback(

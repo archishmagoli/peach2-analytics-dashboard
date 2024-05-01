@@ -375,3 +375,11 @@ def symptoms(weekly_df):
         ],
         style={'marginBottom' : '5em', 'marginRight' : '5em'}
     )
+
+def news_engagement(weekly_df):
+
+    ## TO-DO: Questiona about COVID; News and Institutions -- 7-day post graph, reactions to news posts, topic analysis -- informational news and institutional posts
+
+    all_children = []
+    all_children.append(html.H4(children='News and Institutions', style={"textAlign":"left", 'fontStyle' : 'italic'}))
+    all_children.append(html.P(children="Identifying 'viral' news cycles - a record of the number of posts marked as 'news' or are from trusted institutions.", style={'textAlign': 'left'}))
