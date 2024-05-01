@@ -205,7 +205,7 @@ def tf_idf(sm_df, weekly_df):
 
     all_children.append(html.Div(
             id='tf-idf-graph',
-            style={'width': '50vw', 'maxHeight': '40vh', 'display': 'inline-block', 'verticalAlign': 'top', 'overflow': 'auto', 'border' : '1px solid black'},  # Apply overflow auto to the container
+            style={'width': '50vw', 'maxHeight': '40vh', 'display': 'inline-block', 'verticalAlign': 'top', 'overflow': 'auto', 'border' : '1px solid black', 'marginBottom' : '2em'},  # Apply overflow auto to the container
             children=[
                 dash_table.DataTable(
                     id='table',
@@ -225,7 +225,6 @@ def tf_idf(sm_df, weekly_df):
                 )
             ]
         ))
-    all_children.append(html.Br())
     all_children.append(html.H4('Related Posts', style={'fontStyle': 'italic'}))
     all_children.append(html.P('A collection of the posts that contain one or more of the related keywords!'))
     all_children.append(html.Div(children=posts, style={'width': '50vw', 'overflow': 'auto', 'display' : 'flex'}))
@@ -419,4 +418,4 @@ def news_engagement(sm_df):
     
     all_children.append(html.Div(children=dcc.Graph(figure=figure), style={'border' : '1px solid black'}))
     
-    return html.Div(id='news-engagement', children=all_children, style={'marginTop': '2em', 'width': '45vw'})
+    return html.Div(id='news-engagement', children=all_children, style={'width': '45vw'})
