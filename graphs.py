@@ -1,7 +1,7 @@
 # Import required libraries
 import numpy as np
 import ast, json
-from datetime import datetime
+from datetime import datetime, timedelta
 import dash_bootstrap_components as dbc
 from dash import html, dcc
 from dash.dependencies import Input, Output, State
@@ -15,6 +15,16 @@ def engagement_statistics(filtered_df):
     total_posts = len(filtered_df.index)
     total_reactions = sum(filtered_df['engagementRaw'])
     platformList = list(filtered_df['platform'].unique())
+
+    # Calculate start and end dates for the past week
+    end_date = filtered_df['authoredAt'].max()
+    start_date = end_date - timedelta(days=7)
+
+    # Calculate total posts and total reactions for the past week
+    week_posts = 0
+    week_reactions = 0
+    week_comments = 0
+    total_comments = 0
 
     facebookLikeCount = 0
     facebookShareCount = 0
@@ -36,12 +46,21 @@ def engagement_statistics(filtered_df):
     twitterQuoteCount = 0
                 
     for index, row in filtered_df.iterrows():
+        post_time = row['authoredAt']
+        if start_date <= post_time <= end_date:
+            week_posts += 1
+            week_reactions += row['engagementRaw']
+
         if row['platform'] == 'twitter':
             post = row['raw']
             twitterRetweets += post['retweets']
             twitterReplies += post['replies']
             twitterLikes += post['likes']
             twitterQuoteCount += post['quote_count']
+
+            if start_date <= post_time <= end_date:
+                week_comments += post['replies']
+
 
         elif row['platform'] == 'facebook':
             post = row['raw']['statistics']['actual']
@@ -56,16 +75,29 @@ def engagement_statistics(filtered_df):
             facebookThankfulCount += post['thankfulCount']
             facebookCareCount += post['careCount']
 
+            if start_date <= post_time <= end_date:
+                week_comments += post['commentCount']
 
         else:
             post = row['raw']['statistics']['actual']
             instagramFavoriteCount += post['favoriteCount']
             instagramCommentCount += post['commentCount']
 
+            if start_date <= post_time <= end_date:
+                week_comments += post['commentCount']
+
+    total_comments = instagramCommentCount + facebookCommentCount + twitterReplies
+
     values = []
     values.append(html.Br())
     values.append(html.H4(f'{total_posts:,} ' + 'Total Posts'))
+    values.append(html.H6(f'{week_posts:,} ' + 'Posts This Past Week'))
+
     values.append(html.H4(f'{total_reactions:,} ' + 'Total Reactions'))
+    values.append(html.H6(f'{week_reactions:,} ' + 'Reactions This Past Week'))
+
+    values.append(html.H4(f'{total_comments:,} ' + 'Comments Last Week'))
+    values.append(html.H6(f'{week_comments:,} ' + 'Comments This Past Week'))
 
     if 'facebook' in platformList:
         values.append(html.Div(children=[html.Br(),
@@ -437,7 +469,7 @@ def news_posts(sm_df):
         post_children.append(html.P(row['content']))
 
         posts.append(html.Div(children=post_children, style={'border': '1px solid black', 'height': '25em', 
-                                            'minWidth': '20em', 'maxWidth': '30em', 'overflow': 'auto', 'margin': '1em', 'overflow':'scroll'}))
+                                            'minWidth': '20em', 'maxWidth': '30em', 'overflow': 'auto', 'marginLeft': '1em', 'marginRight' : '1em', 'overflow':'scroll'}))
     
     all_children.append(html.Br())
     all_children.append(html.P(children="Informational News + Institutional posts across all platforms.", style={'textAlign': 'left'}))
